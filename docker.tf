@@ -1,9 +1,8 @@
 resource "aws_instance" "this" {
-    ami = "ami-09c813fb71547fc4f"
-    vpc_security_group_ids = [aws_security_group.docker.id]
-    instance_type = "t2.micro"
+  ami                    = "ami-09c813fb71547fc4f" # This is our devops-practice AMI ID
+  vpc_security_group_ids = [aws_security_group.allow_all_docker.id]
+  instance_type          = "t3.micro"
 
-    
   # 20GB is not enough
   root_block_device {
     volume_size = 50  # Set root volume size to 50GB
@@ -15,18 +14,17 @@ resource "aws_instance" "this" {
   }
 }
 
+resource "aws_security_group" "allow_all_docker" {
+  name        = "allow_all_docker"
+  description = "Allow TLS inbound traffic and all outbound traffic"
 
-resource "aws_security_group" "docker" {
-  name        = "docker"
-  description = "Allow docker inbound traffic and all outbound traffic"
-  
   ingress {
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
- 
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+
   ingress {
     from_port   = 80
     to_port     = 80
@@ -35,15 +33,14 @@ resource "aws_security_group" "docker" {
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-  
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "docker"
+    Name = "allow_tls"
   }
 }
 output "docker_ip" {
